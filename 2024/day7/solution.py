@@ -1,6 +1,3 @@
-from copy import deepcopy
-
-
 def read_file(file):
     with open(file, "r") as f:
         file = f.readlines()
@@ -19,9 +16,14 @@ for i in inp:
 cache = set()
 
 
+def fork_data(temp, data):
+    s = [temp]
+    for a in data:
+        s.append(a)
+    return s
+
+
 def helper(data: list, solve_second_part: bool = False):
-    data_copy = deepcopy(data)
-    data_copy_2 = deepcopy(data)
     if len(data) == 1:
         cache.add(data[0])
         return
@@ -31,25 +33,18 @@ def helper(data: list, solve_second_part: bool = False):
         if solve_second_part:
             cache.add(int(f"{str(data[0])}{str(data[1])}"))
         return
-    temp_plus = data[0] + data[1]
-    data[0] = temp_plus
-    del data[1]
-    helper(data, solve_second_part)
-    temp_mul = data_copy[0] * data_copy[1]
-    data_copy[0] = temp_mul
-    del data_copy[1]
-    helper(data_copy, solve_second_part)
+    helper(fork_data(data[0] + data[1], data[2:]), solve_second_part)
+    helper(fork_data(data[0] * data[1], data[2:]), solve_second_part)
     if solve_second_part:
-        temp_concat = int(f"{str(data_copy_2[0])}{str(data_copy_2[1])}")
-        data_copy_2[0] = temp_concat
-        del data_copy_2[1]
-        helper(data_copy_2, solve_second_part)
+        helper(
+            fork_data(int(f"{str(data[0])}{str(data[1])}"), data[2:]), solve_second_part
+        )
 
 
 sum = 0
 for v in mapping:
     cache = set()
-    helper(v[1], solve_second_part=True)
+    helper(v[1], solve_second_part=False)
     if v[0] in cache:
         sum += v[0]
 
